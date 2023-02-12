@@ -119,7 +119,10 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        return view('frontend.edit');
+
+        $post=Post::with('category')->where('id',$id)->first();
+        $categories=Category::all();
+        return view('frontend.edit',compact('post','categories'));
 
     }
 
