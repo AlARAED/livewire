@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
+use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
+    public function __construct()
+    {
+    $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +21,10 @@ class PostController extends Controller
      */
     public function index()
     {
-        return view('frontend.index');
+
+
+        $posts=Post::with(['user','category'])->orderBy('id','desc')->paginate(5);
+        return view('frontend.index',compact('posts'));
     }
 
     /**
@@ -23,7 +34,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('frontend.create');
+        $categories=Category::all();
+        return view('frontend.create',compact('categories'));
 
     }
 
@@ -35,7 +47,56 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+
+
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|max:255',
+            'body' => 'required',
+            'category_id' => 'required',
+            'image' => 'required|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+
+
+
+
+         $post=new Post();
+         $post->title=$request->title;
+         $post->body=$request->body;
+         $post->category_id=$request->category_id;
+         $post->user_id=Auth::id();
+
+        if (isset($request->image)) {
+            $ext = pathinfo($request->image->getClientOriginalName(),
+                PATHINFO_EXTENSION);
+
+            $new_au= uniqid() . "." . $ext;
+           $path =$request->image->move('uploads',$new_au);
+
+        }
+
+        if(isset($new_au))
+            if ($new_au != ''  or $new_au != null) {
+                $post->image =$new_au;
+
+         }
+
+         $post->save();
+
+
+       return  redirect()->back()->with([
+        'message'=>'Post Created Sucessfully ',
+        'alert-type'=>'success'
+       ]);
+
+
     }
 
     /**

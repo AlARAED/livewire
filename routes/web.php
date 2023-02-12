@@ -1,5 +1,4 @@
 <?php
-namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Route;
 
@@ -23,4 +22,4 @@ Route::get('/', function () {
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('/post','PostController');
 
-Route::resource('/post', \App\Http\Controllers\PostController::class);
+Route::resource('/posts', \App\Http\Controllers\PostController::class);
